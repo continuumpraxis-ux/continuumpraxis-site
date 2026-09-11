@@ -1,0 +1,30 @@
+.DS_Store
+**/.DS_Store
+Thumbs.db
+Desktop.ini
+
+.env
+.env.*
+!.env.example
+
+node_modules/
+.npm/
+.cache/
+
+.idea/
+.vscode/
+*.swp
+*.swo
+
+*.log
+*.zip
+*.tar
+*.tar.gz
+
+# Keep ops notes off the public deploy
+README.md
+*.md.bak
+
+# Local only
+.tmp/
+.grok/
