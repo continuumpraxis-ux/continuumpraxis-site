@@ -5,3 +5,4 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; object-src 'none'; worker-src 'none'; connect-src 'self' https://www.instagram.com https://*.instagram.com https://*.cdninstagram.com https://*.fbcdn.net; script-src 'self' https://www.instagram.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; frame-src https://www.instagram.com https://instagram.com; frame-ancestors 'self'
