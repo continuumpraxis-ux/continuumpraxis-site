@@ -119,39 +119,27 @@ def card(i, r):
     sc = r["shortcode"]
     url = r.get("url") or f"https://www.instagram.com/reel/{sc}/"
     cap = r.get("caption") or ""
-    w = r.get("w") or 9
-    h = r.get("h") or 16
-    aspect = f"{w} / {h}"
     label = f"Open on Instagram: {cap[:80]}".strip()
     badge = f'<span class="reel-badge">{IG_SVG}Open on Instagram</span>'
-    # A horizontal (landscape) reel would look wrong autoplaying in the tall
-    # grid, so show a portrait cover thumbnail instead; clicking opens the reel
-    # on Instagram, where it plays in its native horizontal orientation.
-    portrait_rel = f"/reels/media/{sc}.portrait.jpg"
-    is_horizontal = (
-        r.get("video")
-        and r.get("w")
-        and r.get("h")
-        and r["w"] > r["h"]
-        and os.path.exists(os.path.join(ROOT, portrait_rel.lstrip("/")))
-    )
-    if is_horizontal:
+    # Every tile is a uniform 9:16 portrait. Videos autoplay inline; a blurred
+    # fill (the poster, set as --poster) sits behind them so landscape/odd-ratio
+    # clips still look vertical while playing in full via object-fit: contain.
+    if r.get("video"):
+        poster = r.get("poster") or ""
+        poster_attr = f' poster="{esc(poster)}"' if poster else ""
+        bg = f" --poster: url('{esc(poster)}');" if poster else ""
         aspect = "9 / 16"
         media_inner = (
-            f'<img class="reel-fill" src="{esc(portrait_rel)}" alt="" '
-            f'loading="lazy" decoding="async" />'
-            f'<span class="reel-play" aria-hidden="true">\u25b6</span>{badge}'
-        )
-    elif r.get("video"):
-        poster = f' poster="{esc(r["poster"])}"' if r.get("poster") else ""
-        media_inner = (
-            f'<video src="{esc(r["video"])}"{poster} muted loop playsinline '
+            f'<video src="{esc(r["video"])}"{poster_attr} muted loop playsinline '
             f'preload="metadata" disablepictureinpicture></video>'
             f'<span class="reel-play" aria-hidden="true">\u25b6</span>{badge}'
         )
     elif r.get("image"):
+        img = r["image"]
+        bg = f" --poster: url('{esc(img)}');"
+        aspect = "9 / 16"
         media_inner = (
-            f'<img class="reel-fill" src="{esc(r["image"])}" alt="" '
+            f'<img class="reel-fill" src="{esc(img)}" alt="" '
             f'loading="lazy" decoding="async" />{badge}'
         )
     else:
@@ -159,7 +147,7 @@ def card(i, r):
     return (
         f'      <article class="reel-card" data-reel="{i}" data-shortcode="{esc(sc)}">\n'
         f'        <div class="reel-media" data-href="{esc(url)}" role="link" '
-        f'tabindex="0" aria-label="{esc(label)}" style="aspect-ratio: {aspect}">\n'
+        f'tabindex="0" aria-label="{esc(label)}" style="aspect-ratio: {aspect};{bg}">\n'
         f"          {media_inner}\n"
         f"        </div>\n"
         f'        <p class="reel-caption">{esc(cap)}</p>\n'

@@ -27,13 +27,32 @@
   padding: 0;
   overflow: hidden;
 }
+/* Blurred vertical fill behind the clip, from its own poster, so landscape or
+   odd-ratio videos still look like full vertical tiles while playing. */
+.reel-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--poster, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(30px) brightness(0.5);
+  transform: scale(1.18);
+  z-index: 0;
+}
 .reel-media video,
 .reel-media img.reel-fill {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
-  background: #141210;
+  background: transparent;
+}
+.reel-media .reel-play,
+.reel-media .reel-badge {
+  z-index: 2;
 }
 
 /* Overlay play/open affordance */
