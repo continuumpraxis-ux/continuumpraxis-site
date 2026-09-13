@@ -124,7 +124,25 @@ def card(i, r):
     aspect = f"{w} / {h}"
     label = f"Open on Instagram: {cap[:80]}".strip()
     badge = f'<span class="reel-badge">{IG_SVG}Open on Instagram</span>'
-    if r.get("video"):
+    # A horizontal (landscape) reel would look wrong autoplaying in the tall
+    # grid, so show a portrait cover thumbnail instead; clicking opens the reel
+    # on Instagram, where it plays in its native horizontal orientation.
+    portrait_rel = f"/reels/media/{sc}.portrait.jpg"
+    is_horizontal = (
+        r.get("video")
+        and r.get("w")
+        and r.get("h")
+        and r["w"] > r["h"]
+        and os.path.exists(os.path.join(ROOT, portrait_rel.lstrip("/")))
+    )
+    if is_horizontal:
+        aspect = "9 / 16"
+        media_inner = (
+            f'<img class="reel-fill" src="{esc(portrait_rel)}" alt="" '
+            f'loading="lazy" decoding="async" />'
+            f'<span class="reel-play" aria-hidden="true">\u25b6</span>{badge}'
+        )
+    elif r.get("video"):
         poster = f' poster="{esc(r["poster"])}"' if r.get("poster") else ""
         media_inner = (
             f'<video src="{esc(r["video"])}"{poster} muted loop playsinline '
