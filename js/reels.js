@@ -1,12 +1,14 @@
 (function () {
-  // Mobile nav toggle is handled in main.js. This module only drives the
-  // self-hosted reel players: autoplay the clips that are on screen, pause the
-  // rest, and send a click on any tile to the original post on Instagram.
+  // Self-hosted reel players: autoplay muted clips that are on screen,
+  // pause the rest, and toggle play/pause on tile click. Instagram is only
+  // reached via the explicit "Open on Instagram" link under each card —
+  // never via the play control.
   var reduceMotion =
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function markPlaying(media, on) {
+    if (!media) return;
     if (on) media.classList.add("is-playing");
     else media.classList.remove("is-playing");
   }
@@ -15,10 +17,30 @@
     document.querySelectorAll(".reel-media video")
   );
 
+  function pauseOthers(except) {
+    videos.forEach(function (v) {
+      if (v === except) return;
+      v.pause();
+      markPlaying(v.closest(".reel-media"), false);
+    });
+  }
+
   function tryPlay(v) {
     if (reduceMotion) return;
     var p = v.play();
     if (p && typeof p.catch === "function") p.catch(function () {});
+  }
+
+  function toggleVideo(v) {
+    if (!v) return;
+    if (v.paused) {
+      pauseOthers(v);
+      tryPlay(v);
+      markPlaying(v.closest(".reel-media"), true);
+    } else {
+      v.pause();
+      markPlaying(v.closest(".reel-media"), false);
+    }
   }
 
   if ("IntersectionObserver" in window && videos.length) {
@@ -40,30 +62,29 @@
     videos.forEach(function (v) {
       io.observe(v);
       v.addEventListener("playing", function () {
-        var m = v.closest(".reel-media");
-        if (m) markPlaying(m, true);
+        markPlaying(v.closest(".reel-media"), true);
       });
       v.addEventListener("pause", function () {
-        var m = v.closest(".reel-media");
-        if (m) markPlaying(m, false);
+        markPlaying(v.closest(".reel-media"), false);
       });
     });
   } else {
-    // No IntersectionObserver: at least attempt to play the first few.
     videos.slice(0, 4).forEach(tryPlay);
   }
 
-  // Clicking anywhere on a tile opens the original reel/post on Instagram.
   document.addEventListener("click", function (ev) {
+    // Explicit Instagram links under each card — leave them alone.
+    if (ev.target.closest && ev.target.closest("a[href*='instagram.com']")) {
+      return;
+    }
     var media = ev.target.closest ? ev.target.closest(".reel-media") : null;
     if (!media) return;
-    var href = media.getAttribute("data-href");
-    if (!href) return;
+    var video = media.querySelector("video");
+    if (!video) return;
     ev.preventDefault();
-    window.open(href, "_blank", "noopener,noreferrer");
+    toggleVideo(video);
   });
 
-  // Keyboard access: Enter/Space on a focused tile opens Instagram.
   document.addEventListener("keydown", function (ev) {
     if (ev.key !== "Enter" && ev.key !== " ") return;
     var media =
@@ -71,9 +92,9 @@
         ? document.activeElement
         : null;
     if (!media || !media.classList.contains("reel-media")) return;
-    var href = media.getAttribute("data-href");
-    if (!href) return;
+    var video = media.querySelector("video");
+    if (!video) return;
     ev.preventDefault();
-    window.open(href, "_blank", "noopener,noreferrer");
+    toggleVideo(video);
   });
 })();
