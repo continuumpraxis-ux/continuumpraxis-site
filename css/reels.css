@@ -1,0 +1,128 @@
+/* Reels grid — self-hosted, in-page video playback */
+.reel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+.reel-card {
+  background: var(--paper, #f3eee5);
+  border: 1px solid rgba(20, 18, 16, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(20, 18, 16, 0.04);
+}
+
+/* Media area. Aspect ratio is set per-card inline (from the source
+   dimensions) so both vertical (9:16) and horizontal (16:9) reels display
+   correctly with no cropping. */
+.reel-media {
+  position: relative;
+  display: block;
+  background: #141210;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+}
+/* Blurred vertical fill behind the clip, from its own poster, so landscape or
+   odd-ratio videos still look like full vertical tiles while playing. */
+.reel-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--poster, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(30px) brightness(0.5);
+  transform: scale(1.18);
+  z-index: 0;
+}
+.reel-media video,
+.reel-media img.reel-fill {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: transparent;
+}
+.reel-media .reel-play,
+.reel-media .reel-badge {
+  z-index: 2;
+}
+
+/* Overlay play/open affordance */
+.reel-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(20, 18, 16, 0.72);
+  color: #f3eee5;
+  font-size: 0.78rem;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.reel-media:hover .reel-badge,
+.reel-media:focus-visible .reel-badge {
+  opacity: 1;
+}
+.reel-badge svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Big centered play glyph shown until the clip is actually playing */
+.reel-play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(20, 18, 16, 0.6);
+  color: #f3eee5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 4px;
+  font-size: 1.4rem;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.2s ease;
+}
+.reel-media.is-playing .reel-play {
+  opacity: 0;
+}
+
+.reel-caption {
+  margin: 0;
+  padding: 0.75rem 1rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--ink-soft, #3d3833);
+}
+.reel-link {
+  margin: 0;
+  padding: 0.6rem 1rem 1rem;
+  font-size: 0.9rem;
+}
+.reel-link a {
+  color: var(--teal, #0d7377);
+  text-decoration: none;
+  font-weight: 500;
+}
+.reel-link a:hover {
+  text-decoration: underline;
+}
