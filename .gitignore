@@ -28,4 +28,6 @@ README.md
 # Local only
 .tmp/
 .grok/
+
+# Wrangler local dev state
 .wrangler/
