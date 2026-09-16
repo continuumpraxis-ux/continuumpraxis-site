@@ -1,5 +1,9 @@
 name = "continuum-praxis"
 compatibility_date = "2026-09-11"
 
+# Serve the static site from the repo root. .assetsignore keeps .git and
+# other non-public paths out of the Workers upload (empty dist/ was leaving
+# live stuck on an older Instagram-embed deploy).
 [assets]
-directory = "dist"
+directory = "."
+not_found_handling = "404-page"

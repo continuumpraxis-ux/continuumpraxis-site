@@ -3,7 +3,8 @@
 
 Each reel is rendered as a self-hosted <video> (or <img> for photo posts) so
 playback works in-page for every visitor, independent of Instagram's embed.
-Clicking a tile opens the original post on Instagram.
+Tile click / Enter / Space toggles play/pause. Instagram is only via the
+explicit link under each card — never via the play control.
 
 Run:  python3 reel-desk/build_page.py
 """
@@ -21,7 +22,7 @@ HEAD = """<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reels — Continuum Praxis</title>
-  <meta name="description" content="Studio reels from Continuum Praxis. Videos play right on the page; tap any clip to open it on Instagram." />
+  <meta name="description" content="Studio reels from Continuum Praxis. Videos play right on the page; use Open on Instagram only when you want the original post." />
   <link rel="canonical" href="https://continuumpraxisapp.com/reels" />
   <link rel="icon" href="/icons/favicon.jpg" type="image/jpeg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -119,16 +120,22 @@ def card(i, r):
     sc = r["shortcode"]
     url = r.get("url") or f"https://www.instagram.com/reel/{sc}/"
     cap = r.get("caption") or ""
-    label = f"Open on Instagram: {cap[:80]}".strip()
+    short_cap = (cap[:80] or sc).strip()
+    # Decorative IG hint only — not a click target. Real outbound is .reel-link.
     badge = f'<span class="reel-badge">{IG_SVG}Open on Instagram</span>'
-    # Every tile is a uniform 9:16 portrait. Videos autoplay inline; a blurred
-    # fill (the poster, set as --poster) sits behind them so landscape/odd-ratio
-    # clips still look vertical while playing in full via object-fit: contain.
+    # Every tile is a uniform 9:16 portrait. Videos autoplay muted inline; a
+    # blurred fill (the poster, set as --poster) sits behind them so
+    # landscape/odd-ratio clips still look vertical while playing via
+    # object-fit: contain. Click/keyboard toggles play — never opens IG.
     if r.get("video"):
         poster = r.get("poster") or ""
         poster_attr = f' poster="{esc(poster)}"' if poster else ""
         bg = f" --poster: url('{esc(poster)}');" if poster else ""
         aspect = "9 / 16"
+        label = f"Play or pause reel: {short_cap}"
+        media_attrs = (
+            f'role="button" tabindex="0" aria-label="{esc(label)}"'
+        )
         media_inner = (
             f'<video src="{esc(r["video"])}"{poster_attr} muted loop playsinline '
             f'preload="metadata" disablepictureinpicture></video>'
@@ -138,6 +145,8 @@ def card(i, r):
         img = r["image"]
         bg = f" --poster: url('{esc(img)}');"
         aspect = "9 / 16"
+        label = f"Studio still: {short_cap}"
+        media_attrs = f'aria-label="{esc(label)}"'
         media_inner = (
             f'<img class="reel-fill" src="{esc(img)}" alt="" '
             f'loading="lazy" decoding="async" />{badge}'
@@ -146,8 +155,8 @@ def card(i, r):
         return ""  # no media available; skip
     return (
         f'      <article class="reel-card" data-reel="{i}" data-shortcode="{esc(sc)}">\n'
-        f'        <div class="reel-media" data-href="{esc(url)}" role="link" '
-        f'tabindex="0" aria-label="{esc(label)}" style="aspect-ratio: {aspect};{bg}">\n'
+        f'        <div class="reel-media" {media_attrs} '
+        f'style="aspect-ratio: {aspect};{bg}">\n'
         f"          {media_inner}\n"
         f"        </div>\n"
         f'        <p class="reel-caption">{esc(cap)}</p>\n'
