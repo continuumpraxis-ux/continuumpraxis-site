@@ -1,4 +1,4 @@
-.DS_Store
+﻿.DS_Store
 **/.DS_Store
 Thumbs.db
 Desktop.ini
@@ -21,11 +21,11 @@ node_modules/
 *.tar
 *.tar.gz
 
-# Keep ops notes off the public deploy
-README.md
-*.md.bak
+# Short project README is tracked; keep extra ops notes out of deploy\n*.md.bak
 
 # Local only
 .tmp/
 .grok/
 .wrangler/
+
+
